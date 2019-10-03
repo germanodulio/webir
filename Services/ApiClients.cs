@@ -17,6 +17,13 @@ namespace Services
             await client.OpenAsync();
             ExecuteResponse response = await client.ExecuteAsync(uy);
 
+            while (response.Salida.respuestastatus.status == 0)
+            {
+                uy.FechaDesde = uy.FechaDesde.Value.AddDays(-1);
+                uy.FechaHasta = uy.FechaDesde;
+                response = await client.ExecuteAsync(uy);
+            }
+
             return response;
         }
     }
