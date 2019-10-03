@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "webirBackend", "webirBackend.csproj", "{A920CE71-4C1B-4A63-A807-CD9AABBAA507}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "..\Services\Services.csproj", "{AE43C1D7-9BEE-4070-BDD9-9B17B42A0A08}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A920CE71-4C1B-4A63-A807-CD9AABBAA507}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A920CE71-4C1B-4A63-A807-CD9AABBAA507}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A920CE71-4C1B-4A63-A807-CD9AABBAA507}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A920CE71-4C1B-4A63-A807-CD9AABBAA507}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE43C1D7-9BEE-4070-BDD9-9B17B42A0A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE43C1D7-9BEE-4070-BDD9-9B17B42A0A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE43C1D7-9BEE-4070-BDD9-9B17B42A0A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE43C1D7-9BEE-4070-BDD9-9B17B42A0A08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {320F129C-7C3F-48C4-8FBC-531CDBDFEA14}
+	EndGlobalSection
+EndGlobal
