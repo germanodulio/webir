@@ -244,6 +244,11 @@ namespace Uruguay
                 this.formaArbitrarField = value;
             }
         }
+
+        public override string ToString()
+        {
+            return $"Moneda: {Nombre} - Compra: {TCC} - Venta: {TCV} - Fecha: {Fecha.ToString()}";
+        }
     }
     
     /// <remarks/>
@@ -341,6 +346,21 @@ namespace Uruguay
                 this.datoscotizacionesField = value;
             }
         }
+
+        public override string ToString()
+        {
+            if (respuestastatus == null || respuestastatus.status == 0 || 
+                datoscotizacionesField == null || datoscotizacionesField.Length == 0)
+            {
+                return string.Empty;
+            }
+            string result = string.Empty;
+            foreach (datoscotizacionesdato dato in datoscotizacionesField)
+            {
+                result += $"{dato.ToString()}";
+            }
+            return result;
+        }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -380,6 +400,11 @@ namespace Uruguay
         public ExecuteResponse(Uruguay.wsbcucotizacionesout Salida)
         {
             this.Salida = Salida;
+        }
+
+        public override string ToString()
+        {
+            return Salida.ToString();
         }
     }
     

@@ -5,7 +5,7 @@ namespace Services
 {
     public class ApiClients
     {
-        public static async System.Threading.Tasks.Task<ExecuteResponse> getValueAsync(short coinCode)
+        public static async System.Threading.Tasks.Task<ExecuteResponse> GetLastCotizationForCoin(short coinCode)
         {
             wsbcucotizacionesin uy = new wsbcucotizacionesin();
             uy.Moneda = new short[] { coinCode };

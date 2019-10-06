@@ -16,15 +16,20 @@ namespace webirBackend.Controllers
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
-        { 
-            // Get Peso Argentino cotization
-            Task<ExecuteResponse> response = ApiClients.getValueAsync(500);
+        {
+            List<string> values = new List<string>();
 
+            // Get Peso Argentino cotization
+            Task<ExecuteResponse> response = ApiClients.GetLastCotizationForCoin(500);
             ExecuteResponse result = response.Result;
-            return new string[] { result.Salida.datoscotizaciones[0].Nombre,
-                result.Salida.datoscotizaciones[0].Fecha.ToString(),
-                "Compra: " + result.Salida.datoscotizaciones[0].TCC.ToString(),
-                "Venta: " + result.Salida.datoscotizaciones[0].TCV.ToString() };
+            values.Add(result.ToString());
+
+            // Get Dolar USA cotization
+            Task<ExecuteResponse> response2 = ApiClients.GetLastCotizationForCoin(2222);
+            ExecuteResponse result2 = response2.Result;
+            values.Add(result2.ToString());
+
+            return values;
         }
 
         // GET api/values/5
