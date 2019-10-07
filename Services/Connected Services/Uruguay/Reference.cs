@@ -7,6 +7,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace Uruguay
 {
     
@@ -247,7 +249,7 @@ namespace Uruguay
 
         public override string ToString()
         {
-            return $"Moneda: {Nombre} - Compra: {TCC} - Venta: {TCV} - Fecha: {Fecha.ToString()}";
+            return $"Moneda: {Nombre} - Compra: {TCC} - Venta: {TCV} - Fecha: {Fecha.Value.ToString("yyyy-MM-dd")}";
         }
     }
     

@@ -1,11 +1,9 @@
 ﻿using RestSharp;
+
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using Uruguay;
 
 namespace Services
@@ -20,7 +18,7 @@ namespace Services
             uy.Moneda = new short[] { coinCode };
             uy.FechaDesde = DateTime.Now.Date;
             uy.FechaHasta = DateTime.Now.Date;
-            
+
             wsbcucotizacionesSoapPortClient client = new wsbcucotizacionesSoapPortClient();
 
             await client.OpenAsync();
@@ -51,7 +49,7 @@ namespace Services
             Regex todayRegexp = new Regex("\"d\":\"" + lastDay.ToString("yyyy-MM-dd") + "\",\"v\":[0-9]*.[0-9]*");
             if (todayRegexp.IsMatch(response.Content))
             {
-                return todayRegexp.Match(response.Content).Value.Split("\"v\":")[1];
+                return $"Fecha: {lastDay.ToString("yyyy-MM-dd")}, Valor: {todayRegexp.Match(response.Content).Value.Split("\"v\":")[1]}";
             }
             return response.Content;
         }

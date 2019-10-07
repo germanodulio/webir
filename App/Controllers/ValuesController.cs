@@ -17,17 +17,20 @@ namespace webirBackend.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
+            // ARGENTINA 
             string dolar = $"ARG $ -> Dolar: {ApiClients.GetArgentinaLastCotization("usd")}";
             string dolarOficial = $"ARG $ -> Dolar Oficial: {ApiClients.GetArgentinaLastCotization("usd_of")}";
 
             List<string> values = new List<string>() { dolar, dolarOficial };
 
-            // Get Peso Argentino cotization
+            // URUGUAY
+
+            // Get Peso Argentino quotation
             Task<ExecuteResponse> response = ApiClients.GetUruguayLastCotizationForCoin(500);
             ExecuteResponse result = response.Result;
             values.Add(result.ToString());
 
-            // Get Dolar USA cotization
+            // Get Dollar USA quotation
             Task<ExecuteResponse> response2 = ApiClients.GetUruguayLastCotizationForCoin(2222);
             ExecuteResponse result2 = response2.Result;
             values.Add(result2.ToString());
