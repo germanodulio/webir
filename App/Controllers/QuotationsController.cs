@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using System;
 using System.Collections.Generic;
+using static Common.Utils;
 
 namespace webirBackend.Controllers
 {
@@ -15,34 +16,22 @@ namespace webirBackend.Controllers
     {
         // GET: api/Quotations
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<Quotation> Get()
         {
-            throw new NotImplementedException();
+            return new List<Quotation>() { 
+                Core.GetLastQuotation(CoinCode.DolarArg), 
+                Core.GetLastQuotation(CoinCode.DolarBlue), 
+                Core.GetLastQuotation(CoinCode.DolarUy), 
+                Core.GetLastQuotation(CoinCode.PesoArgUy) };
         }
 
         // GET: api/Quotations/5
-        [HttpGet("{id}", Name = "Get")]
-        public Quotation Get(int currencyId)
+        [HttpGet("{currencyCode}", Name = "Get")]
+        public Quotation Get(string currencyCode)
+            // DolarUy, DolarArg, DolarBlue, PesoArgUy
         {
-            return Core.GetLastQuotation(currencyId);
+            CoinCode code = Enum.Parse<CoinCode>(currencyCode);
+            return Core.GetLastQuotation(code);
         }
-
-        //// POST: api/Quotations
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT: api/Quotations/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE: api/ApiWithActions/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }
