@@ -5,7 +5,7 @@ Software Requirements
 * Net Core 2.2
 * PostgreSQL 12.0 or above
 
-Api use
+# API usage
 
 By default API run in localhost:[portnumber]/api
 
