@@ -1,11 +1,11 @@
 # Webir Project
 
-Software Requirements
+## Software Requirements
 
 * Net Core 2.2
-* PostgreSQL 12.0 or above
+* PostgreSQL 12.0 or above (not required yet)
 
-# API usage
+## API usage
 
 By default API run in localhost:[portnumber]/api
 
