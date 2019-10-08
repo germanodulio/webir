@@ -14,4 +14,4 @@ To access a scpecific quotation append "/Quotations/<coinCode>", being coinCode 
 	* PesoArgUy: gets Peso Argentino quotation in Central Bank of Uruguay
 	* DolarArg: gets official dollar quotation in Central Bank of Argentina
 	* DolarBlue: gets Blue dollar quotation in Argentina
-	* Best returns the best currency to carry on to Argentina
+	* Best returns the best currency to carry on from Uruguay to Argentina
