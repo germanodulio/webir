@@ -27,9 +27,13 @@ namespace webirBackend.Controllers
 
         // GET: api/Quotations/5
         [HttpGet("{currencyCode}", Name = "Get")]
-        public Quotation Get(string currencyCode)
-            // DolarUy, DolarArg, DolarBlue, PesoArgUy
+        public object Get(string currencyCode)
+            // DolarUy, DolarArg, DolarBlue, PesoArgUy, Best
         {
+            if (currencyCode == "Best")
+            {
+                return Core.GetMostConvenientCurrency(DateTime.Today);
+            }
             CoinCode code = Enum.Parse<CoinCode>(currencyCode);
             return Core.GetLastQuotation(code);
         }
