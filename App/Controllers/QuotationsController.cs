@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using System;
 using System.Collections.Generic;
-using static Common.Utils;
+using static Common.Enums;
 
 namespace webirBackend.Controllers
 {
@@ -20,22 +20,22 @@ namespace webirBackend.Controllers
         {
             return new List<Quotation>() { 
                 Core.GetLastQuotation(CoinCode.DolarArg), 
-                Core.GetLastQuotation(CoinCode.DolarBlue), 
+                Core.GetLastQuotation(CoinCode.DolarArgBlue), 
                 Core.GetLastQuotation(CoinCode.DolarUy), 
                 Core.GetLastQuotation(CoinCode.PesoArgUy) };
         }
 
-        // GET: api/Quotations/5
-        [HttpGet("{currencyCode}", Name = "Get")]
-        public object Get(string currencyCode)
+        // GET: api/Quotations/{code}
+        [HttpGet("{code}", Name = "Get")]
+        public object Get(string code)
             // DolarUy, DolarArg, DolarBlue, PesoArgUy, Best
         {
-            if (currencyCode == "Best")
+            if (code == "Best")
             {
-                return Core.GetMostConvenientCurrency(DateTime.Today);
+                return Core.GetMostConvenientCurrency(DateTime.Today.Date);
             }
-            CoinCode code = Enum.Parse<CoinCode>(currencyCode);
-            return Core.GetLastQuotation(code);
+            CoinCode coinCode = Enum.Parse<CoinCode>(code);
+            return Core.GetLastQuotation(coinCode);
         }
     }
 }

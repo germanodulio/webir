@@ -7,7 +7,7 @@ using Services;
 using System;
 using System.Runtime.InteropServices;
 
-using static Common.Utils;
+using static Common.Enums;
 
 namespace BL
 {
@@ -18,28 +18,32 @@ namespace BL
             // 1 dollar based calculation. You are in Uruguay and will travel to Argentina, so...which currency will you carry?
             try
             {
+                DBManager dbMgr = new DBManager();
+
                 // Get Dollar quotation in Argentina's central bank
-                Quotation dolarArg = Manager.GetQuotation(CoinCode.DolarArg, date);
+                Quotation dolarArg = dbMgr.GetQuotation(CoinCode.DolarArg, date);
                 if (dolarArg == null)
                 {
                     dolarArg = ApiClients.GetQuotation(CoinCode.DolarArg);
+                    dolarArg.Coin = dbMgr.GetCurrency(CoinCode.DolarArg);
                 }
+                
                 //TODO consider Dollar Blue too?
 
-                // unDolarEnPesosArgentinosEnUy = con el valor correspondiente a un dolar en pesos uruguayos: cuantos pesos argentinos compro?
-
                 // Get Dollar quotation in Uruguay's central bank
-                Quotation dolarUy = Manager.GetQuotation(CoinCode.DolarUy, date);
+                Quotation dolarUy = dbMgr.GetQuotation(CoinCode.DolarUy, date);
                 if (dolarUy == null)
                 {
                     dolarUy = ApiClients.GetQuotation(CoinCode.DolarUy);
+                    dolarUy.Coin = dbMgr.GetCurrency(CoinCode.DolarUy);
                 }
 
                 // Get Peso Argentino quotation in Uruguay's central bank 
-                Quotation pesoArgUy = Manager.GetQuotation(CoinCode.PesoArgUy, date);
+                Quotation pesoArgUy = dbMgr.GetQuotation(CoinCode.PesoArgUy, date);
                 if (pesoArgUy == null)
                 {
                     pesoArgUy = ApiClients.GetQuotation(CoinCode.PesoArgUy);
+                    pesoArgUy.Coin = dbMgr.GetCurrency(CoinCode.PesoArgUy);
                 }
 
                 // How many Peso Argentino's can you get with 1 dollar in Uruguay?
@@ -54,11 +58,11 @@ namespace BL
                 // sino comprar pesos argentinos en Uruguay para llevar 
                 if (dolarArg.Value > withOneDollarYouGetArgPeso)
                 {
-                    return Currency.GetCoinForCode(CoinCode.DolarArg);
+                    return dolarArg.Coin;
                 }
                 else
                 {
-                    return Currency.GetCoinForCode(CoinCode.PesoArgUy);
+                    return pesoArgUy.Coin;
                 }
             }
             catch
@@ -75,12 +79,20 @@ namespace BL
         /// <returns></returns>
         public static Quotation GetLastQuotation(CoinCode coinCode)
         {
-            // TODO if it is not stored in DB, use Api services to get it and store it in DB
-            Quotation quotation = Manager.GetQuotation(coinCode);
+            DBManager dbMgr = new DBManager();
+
+            // Try to get it from DB for today
+            Quotation quotation = dbMgr.GetQuotation(coinCode, DateTime.Today.Date);
 
             if (quotation == null)
-            {
+            {// Wasn't in DB, consume central bank WS
                 quotation = ApiClients.GetQuotation(coinCode);
+
+                // Add new quotation to DB if it is new
+                if (!dbMgr.QuotationExists(quotation))
+                {
+                    dbMgr.AddNewQuotation(quotation);
+                }
             }
 
             return quotation;

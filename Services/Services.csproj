@@ -13,8 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataBaseConnection\Common.csproj" />
-    <ProjectReference Include="..\DataBaseConnector\DataBaseConnector.csproj" />
+    <ProjectReference Include="..\DataBaseConnection\Repositories.csproj" />
   </ItemGroup>
 
   <ItemGroup>

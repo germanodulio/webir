@@ -1,7 +1,5 @@
 ﻿using Common;
 
-using DataBaseConnector;
-
 using RestSharp;
 
 using System;
@@ -10,7 +8,7 @@ using System.Threading.Tasks;
 
 using Uruguay;
 
-using static Common.Utils;
+using static Common.Enums;
 
 namespace Services
 {
@@ -20,7 +18,7 @@ namespace Services
 
         public static Quotation GetQuotation(CoinCode code)
         {
-            if (code == CoinCode.DolarArg || code == CoinCode.DolarBlue)
+            if (code == CoinCode.DolarArg || code == CoinCode.DolarArgBlue)
             {
                 return GetArgentinaLastCotization(code);
             }
@@ -65,7 +63,6 @@ namespace Services
                 result = new Quotation();
                 result.Date = response.Result.Salida.datoscotizaciones[0].Fecha.Value;
                 result.Value = response.Result.Salida.datoscotizaciones[0].TCV;
-                result.Coin = Currency.GetCoinForCode(code);
             }
 
             return result;
@@ -81,9 +78,9 @@ namespace Services
             IRestResponse response = client.Execute(request);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new Exception(response.Content);
+                throw new Exception(response.ErrorMessage);
             }
-            DateTime lastDay = DateTime.Today;
+            DateTime lastDay = DateTime.Today.Date;
             while (!response.Content.Contains(lastDay.ToString("yyyy-MM-dd")))
             {
                 lastDay = lastDay.AddDays(-1);
@@ -93,11 +90,7 @@ namespace Services
             if (todayRegexp.IsMatch(response.Content))
             {
                 result.Date = lastDay;
-                result.Coin = Currency.GetCoinForCode(coinCode);
                 result.Value = double.Parse(todayRegexp.Match(response.Content).Value.Split("\"v\":")[1]);
-
-                //TODO save to DB new found quotation
-                Manager.AddNewQuotation(result);
 
                 return result;
             }
