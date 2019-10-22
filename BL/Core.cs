@@ -87,6 +87,7 @@ namespace BL
             if (quotation == null)
             {// Wasn't in DB, consume central bank WS
                 quotation = ApiClients.GetQuotation(coinCode);
+                quotation.Coin = dbMgr.GetCurrency(coinCode);
 
                 // Add new quotation to DB if it is new
                 if (!dbMgr.QuotationExists(quotation))

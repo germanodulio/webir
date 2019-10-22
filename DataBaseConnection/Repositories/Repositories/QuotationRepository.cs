@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,6 +22,7 @@ namespace Common.Repositories
         {
             q.Id = 0;
             _db.Quotations.Add(q);
+            _db.Entry(q.Coin).State = EntityState.Detached;
             _db.SaveChanges();
             return q.Id;
         }
