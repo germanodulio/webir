@@ -11,7 +11,7 @@
 Run "Update-Database" in Package Manager Console over "Common" project.
 
 ## Command Line
-Run "netcore ef update database" over "/Common" directory.
+Run "netcore ef update database" over "/Repositories" directory.
 
 ### Important
 In file /Repositories/Model/DbContext/ContextFactory.cs you must update connection string with yours.
