@@ -5,6 +5,7 @@ using DataBaseConnector;
 using Services;
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 using static Common.Enums;
@@ -27,7 +28,7 @@ namespace BL
                     dolarArg = ApiClients.GetQuotation(CoinCode.DolarArg);
                     dolarArg.Coin = dbMgr.GetCurrency(CoinCode.DolarArg);
                 }
-                
+
                 //TODO consider Dollar Blue too?
 
                 // Get Dollar quotation in Uruguay's central bank
@@ -70,6 +71,43 @@ namespace BL
                 return null;
             }
 
+        }
+
+        public static object GetCotizationsBetween(List<string> codes, DateTime startTime, DateTime endTime)
+        {
+            // control dates validity
+            if (startTime > endTime)
+            {
+                throw new Exception("La fecha de inicio no puede ser mayor a la de fin.");
+            }
+
+            if (endTime > DateTime.Today.Date)
+            {
+                throw new Exception("La fecha de fin no puede ser mayor a la fecha de hoy.");
+            }
+
+            List<List<Quotation>> result = new List<List<Quotation>>();
+            DateTime iterator = startTime;
+            DBManager mgr = new DBManager();
+            while (iterator <= endTime)
+            {
+                List<Quotation> current = new List<Quotation>();
+                foreach (string code in codes)
+                {
+                    if (Enum.TryParse(code, out CoinCode coinCode))
+                    {
+                        Quotation q = mgr.GetQuotation(coinCode, iterator);
+                        if (q != null)
+                        {
+                            current.Add(q);
+                        }
+                    }
+                }
+                result.Add(current);
+                iterator = iterator.AddDays(1);
+            }
+
+            return result;
         }
 
         /// <summary>

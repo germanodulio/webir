@@ -37,5 +37,11 @@ namespace webirBackend.Controllers
             CoinCode coinCode = Enum.Parse<CoinCode>(code);
             return Core.GetLastQuotation(coinCode);
         }
+
+        [HttpPost]
+        public object GetList(List<string> codes, DateTime startTime, DateTime endTime)
+        {
+            return Core.GetCotizationsBetween(codes, startTime.Date, endTime.Date);
+        }
     }
 }
