@@ -5,7 +5,8 @@
 * Net Core 2.2
 * SQLServer 2017
 
-# Create DataBase [https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/]
+# Create DataBase 
+Official docs at https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/
 
 ## Visual Studio
 Run "Update-Database" in Package Manager Console over "Common" project.
