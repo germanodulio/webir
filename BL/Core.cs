@@ -6,6 +6,7 @@ using Services;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 using static Common.Enums;
@@ -25,8 +26,10 @@ namespace BL
                 Quotation dolarArg = dbMgr.GetQuotation(CoinCode.DolarArg, date);
                 if (dolarArg == null)
                 {
-                    dolarArg = ApiClients.GetQuotation(CoinCode.DolarArg);
+                    dolarArg = ApiClients.GetQuotation(CoinCode.DolarArg, date, date)[0];
                     dolarArg.Coin = dbMgr.GetCurrency(CoinCode.DolarArg);
+
+                    dbMgr.AddNewQuotation(dolarArg);
                 }
 
                 //TODO consider Dollar Blue too?
@@ -35,16 +38,18 @@ namespace BL
                 Quotation dolarUy = dbMgr.GetQuotation(CoinCode.DolarUy, date);
                 if (dolarUy == null)
                 {
-                    dolarUy = ApiClients.GetQuotation(CoinCode.DolarUy);
+                    dolarUy = ApiClients.GetQuotation(CoinCode.DolarUy, date, date)[0];
                     dolarUy.Coin = dbMgr.GetCurrency(CoinCode.DolarUy);
+                    dbMgr.AddNewQuotation(dolarUy);
                 }
 
                 // Get Peso Argentino quotation in Uruguay's central bank 
                 Quotation pesoArgUy = dbMgr.GetQuotation(CoinCode.PesoArgUy, date);
                 if (pesoArgUy == null)
                 {
-                    pesoArgUy = ApiClients.GetQuotation(CoinCode.PesoArgUy);
+                    pesoArgUy = ApiClients.GetQuotation(CoinCode.PesoArgUy, date, date)[0];
                     pesoArgUy.Coin = dbMgr.GetCurrency(CoinCode.PesoArgUy);
+                    dbMgr.AddNewQuotation(pesoArgUy);
                 }
 
                 // How many Peso Argentino's can you get with 1 dollar in Uruguay?
@@ -73,42 +78,77 @@ namespace BL
 
         }
 
-        public static object GetCotizationsBetween(List<string> codes, DateTime startTime, DateTime endTime)
+        public static void InitialLoad()
+        {
+            // Load last 7 cotizations
+            List<DateTime> dates = Utils.GetLastDays(DateTime.Today.Date, 7);
+
+            GetCotizations(new List<string>() { "DolarUy", "PesoArgUy", "DolarArg", "DolarBlue" }, dates);
+        }
+
+        public static object GetCotizationsBetween(List<string> codes, DateTime start, DateTime end)
         {
             // control dates validity
-            if (startTime > endTime)
+            if (start > end)
             {
                 throw new Exception("La fecha de inicio no puede ser mayor a la de fin.");
             }
 
-            if (endTime > DateTime.Today.Date)
+            if (end.Date > DateTime.Today.Date)
             {
                 throw new Exception("La fecha de fin no puede ser mayor a la fecha de hoy.");
             }
 
+            return GetCotizations(codes, Utils.GetValidDays(start, end));
+
+        }
+
+        public static object GetCotizations(List<string> codes, List<DateTime> days)
+        {
+            // control dates validity
+            if (days == null || days.Count == 0)
+            {
+                throw new Exception("No se encontraron fechas.");
+            }
+
+            if (days.Any(d => !Utils.IsValidDay(d)))
+            {
+                throw new Exception("Hay alguna fecha invalida.");
+            }
+
             List<List<Quotation>> result = new List<List<Quotation>>();
-            DateTime iterator = startTime;
+            
             DBManager mgr = new DBManager();
-            while (iterator <= endTime)
+            foreach (DateTime day in days)
             {
                 List<Quotation> current = new List<Quotation>();
                 foreach (string code in codes)
                 {
                     if (Enum.TryParse(code, out CoinCode coinCode))
                     {
-                        Quotation q = mgr.GetQuotation(coinCode, iterator);
+                        Quotation q = mgr.GetQuotation(coinCode, day);
                         if (q != null)
                         {
                             current.Add(q);
                         }
+                        else
+                        {
+                            q = ApiClients.GetQuotation(coinCode, day, day)[0];
+                            if (q != null)
+                            {
+                                q.Coin = mgr.GetCurrency(coinCode);
+                                current.Add(q);
+                                mgr.AddNewQuotation(q);
+                            }
+                        }
                     }
                 }
                 result.Add(current);
-                iterator = iterator.AddDays(1);
             }
 
             return result;
         }
+
 
         /// <summary>
         /// 
@@ -124,7 +164,7 @@ namespace BL
 
             if (quotation == null)
             {// Wasn't in DB, consume central bank WS
-                quotation = ApiClients.GetQuotation(coinCode);
+                quotation = ApiClients.GetQuotation(coinCode, DateTime.Today.Date, DateTime.Today.Date)[0];
                 quotation.Coin = dbMgr.GetCurrency(coinCode);
 
                 // Add new quotation to DB if it is new

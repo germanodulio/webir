@@ -11,6 +11,7 @@ namespace webirBackend
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            BL.Core.InitialLoad();
         }
 
         public IConfiguration Configuration { get; }

@@ -3,6 +3,7 @@
 using RestSharp;
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -16,24 +17,24 @@ namespace Services
     {
         const string access_token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDE4NzE1MjMsInR5cGUiOiJleHRlcm5hbCIsInVzZXIiOiJnZXJvZHU5MUBnbWFpbC5jb20ifQ.OxgXbVmSWkG-F5woqunEYlCqNwwR2A3pn967RjSPUnitbbZ0QBsRm7zjAPiKeMVqInXu1-nHr3RvsKHgVutWMA";
 
-        public static Quotation GetQuotation(CoinCode code)
+        public static List<Quotation> GetQuotation(CoinCode code, DateTime start, DateTime end)
         {
             if (code == CoinCode.DolarArg || code == CoinCode.DolarArgBlue)
             {
-                return GetArgentinaLastCotization(code);
+                return GetArgentinaCotization(code, Utils.GetValidDays(start, end));
             }
             else
             {
-                return GetUruguayLastCotization(code);
+                return GetUruguayCotizations(code, start, end);
             }
         }
 
-        private static async Task<ExecuteResponse> GetUruguayLastCotizationInternal(short coinCode)
+        private static async Task<ExecuteResponse> GetUruguayCotizationsInternal(short coinCode, DateTime start, DateTime end)
         {
             wsbcucotizacionesin uy = new wsbcucotizacionesin();
             uy.Moneda = new short[] { coinCode };
-            uy.FechaDesde = DateTime.Now.Date;
-            uy.FechaHasta = DateTime.Now.Date;
+            uy.FechaDesde = start.Date;
+            uy.FechaHasta = end.Date;
 
             wsbcucotizacionesSoapPortClient client = new wsbcucotizacionesSoapPortClient();
 
@@ -51,53 +52,57 @@ namespace Services
             return response;
         }
 
-        private static Quotation GetUruguayLastCotization(CoinCode code)
+        private static List<Quotation> GetUruguayCotizations(CoinCode code, DateTime start, DateTime end)
         {
-            Quotation result = null;
+            List<Quotation> result = new List<Quotation>();
 
             short coinCode = (short)(code == CoinCode.DolarUy ? 2222 : 500);
-            Task<ExecuteResponse> response = GetUruguayLastCotizationInternal(coinCode);
+            Task<ExecuteResponse> response = GetUruguayCotizationsInternal(coinCode, start, end);
             while (response.Status != TaskStatus.RanToCompletion) ;
             if (response.Result.Salida.respuestastatus.status == 1)
             {
-                result = new Quotation();
-                result.Date = response.Result.Salida.datoscotizaciones[0].Fecha.Value;
-                result.Value = response.Result.Salida.datoscotizaciones[0].TCV;
+                Quotation q = new Quotation();
+                q.Date = response.Result.Salida.datoscotizaciones[0].Fecha.Value;
+                q.Value = response.Result.Salida.datoscotizaciones[0].TCV;
+
+                result.Add(q);
             }
 
             return result;
         }
 
-        private static Quotation GetArgentinaLastCotization(CoinCode coinCode)
+        private static List<Quotation> GetArgentinaCotization(CoinCode coinCode, List<DateTime> dates)
         {
             string coin = coinCode == CoinCode.DolarArg ? "usd" : "usd_of";
             var client = new RestClient("https://api.estadisticasbcra.com/" + coin);
             var request = new RestRequest(Method.GET);
             request.AddHeader("Authorization", $"BEARER {access_token}");
-            //request.AddHeader("data", "{d:\"2018-12-31\"}");
             IRestResponse response = client.Execute(request);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new Exception(response.ErrorMessage);
+                throw new Exception("api.estadisticasbcra.com returned an error: " + response.ErrorMessage);
             }
-            DateTime lastDay = DateTime.Today.Date;
-            while (!response.Content.Contains(lastDay.ToString("yyyy-MM-dd")))
+            List<Quotation> results = new List<Quotation>();
+            foreach (DateTime date in dates)
             {
-                lastDay = lastDay.AddDays(-1);
-            }
-            Quotation result = new Quotation();
-            Regex todayRegexp = new Regex("\"d\":\"" + lastDay.ToString("yyyy-MM-dd") + "\",\"v\":[0-9]*.[0-9]*");
-            if (todayRegexp.IsMatch(response.Content))
-            {
-                result.Date = lastDay;
-                result.Value = double.Parse(todayRegexp.Match(response.Content).Value.Split("\"v\":")[1]);
+                if (response.Content.Contains(date.ToString("yyyy-MM-dd")))
+                {
+                    Regex dateRegex = new Regex("\"d\":\"" + date.ToString("yyyy-MM-dd") + "\",\"v\":[0-9]*\\.?[0-9]*");
+                    if (dateRegex.IsMatch(response.Content))
+                    {
+                        Quotation q = new Quotation();
+                        q.Date = date;
+                        string matched = dateRegex.Match(response.Content).Value;
+                        if (!string.IsNullOrEmpty(matched))
+                        {
+                            q.Value = double.Parse(matched.Split("\"v\":")[1]);
 
-                return result;
+                            results.Add(q);
+                        }
+                    }
+                }
             }
-            else
-            {
-                throw new Exception($"Could not find a cotization for {coin}. Make sure provided coin code is valid.");
-            }
+            return results;
         }
     }
 }
