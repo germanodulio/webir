@@ -2,7 +2,7 @@
 using Common.Services;
 
 using System;
-
+using System.Collections.Generic;
 using static Common.Enums;
 
 namespace DataBaseConnector
@@ -25,7 +25,13 @@ namespace DataBaseConnector
 
         public Quotation GetQuotation(CoinCode code, DateTime date)
         {
-            return _quotationSrv.Get(code, date);
+            Quotation result = _quotationSrv.Get(code, date);
+            if (result != null)
+            {
+                result.Coin = _currencySrv.Get(code);
+            }
+
+            return result;
         }
 
         public Currency GetCurrency(CoinCode code)
@@ -36,6 +42,24 @@ namespace DataBaseConnector
         internal bool QuotationExists(Quotation quotation)
         {
             return _quotationSrv.Get(code: quotation.Coin.RefCode, date: quotation.Date) != null;
+        }
+
+        internal List<Quotation> GetQuotations(CoinCode coinCode, List<DateTime> days, ref List<DateTime> missingDays)
+        {
+            List<Quotation> result = new List<Quotation>();
+            foreach (DateTime day in days)
+            {
+                Quotation q = _quotationSrv.Get(coinCode, day);
+                if (q != null)
+                {
+                    result.Add(q);
+                }
+                else
+                {
+                    missingDays.Add(day);
+                }
+            }
+            return result;
         }
     }
 }

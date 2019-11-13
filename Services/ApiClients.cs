@@ -15,7 +15,7 @@ namespace Services
 {
     public class ApiClients
     {
-        const string access_token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDE4NzE1MjMsInR5cGUiOiJleHRlcm5hbCIsInVzZXIiOiJnZXJvZHU5MUBnbWFpbC5jb20ifQ.OxgXbVmSWkG-F5woqunEYlCqNwwR2A3pn967RjSPUnitbbZ0QBsRm7zjAPiKeMVqInXu1-nHr3RvsKHgVutWMA";
+        const string access_token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDUxNDc0NzgsInR5cGUiOiJleHRlcm5hbCIsInVzZXIiOiJnZXJvZHU5MUBnbWFpbC5jb20ifQ.zZ0bJH9Kf3DXIMwa65wUV9oGr2umUr3x_clR4Rd4UtHlZkmjjMAUlT9a4oXloTzrKdUyeGzYwFniUhYUnmoMjw";
 
         public static List<Quotation> GetQuotation(CoinCode code, DateTime start, DateTime end)
         {

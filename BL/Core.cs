@@ -81,7 +81,7 @@ namespace BL
         public static void InitialLoad()
         {
             // Load last 7 cotizations
-            List<DateTime> dates = Utils.GetLastDays(DateTime.Today.Date, 7);
+            List<DateTime> dates = Utils.GetLastDays(DateTime.Today.Date, 10);
 
             GetCotizations(new List<string>() { "DolarUy", "PesoArgUy", "DolarArg", "DolarBlue" }, dates);
         }
@@ -113,37 +113,38 @@ namespace BL
 
             if (days.Any(d => !Utils.IsValidDay(d)))
             {
-                throw new Exception("Hay alguna fecha invalida.");
+                throw new Exception("Hay alguna fecha inválida.");
             }
 
             List<List<Quotation>> result = new List<List<Quotation>>();
-            
+
             DBManager mgr = new DBManager();
-            foreach (DateTime day in days)
+
+            foreach (string code in codes)
             {
-                List<Quotation> current = new List<Quotation>();
-                foreach (string code in codes)
+                if (Enum.TryParse(code, out CoinCode coinCode))
                 {
-                    if (Enum.TryParse(code, out CoinCode coinCode))
+
+                    List<DateTime> missingDays = new List<DateTime>();
+                    List<Quotation> current = mgr.GetQuotations(coinCode, days, ref missingDays);
+                    foreach (DateTime day in missingDays)
                     {
-                        Quotation q = mgr.GetQuotation(coinCode, day);
+                        List<Quotation> list = ApiClients.GetQuotation(coinCode, day, day);
+                        Quotation q = null;
+                        if (list != null && list.Count > 0)
+                        {
+                            q = list[0];
+                        }
+
                         if (q != null)
                         {
+                            q.Coin = mgr.GetCurrency(coinCode);
                             current.Add(q);
+                            mgr.AddNewQuotation(q);
                         }
-                        else
-                        {
-                            q = ApiClients.GetQuotation(coinCode, day, day)[0];
-                            if (q != null)
-                            {
-                                q.Coin = mgr.GetCurrency(coinCode);
-                                current.Add(q);
-                                mgr.AddNewQuotation(q);
-                            }
-                        }
+                        result.Add(current);
                     }
                 }
-                result.Add(current);
             }
 
             return result;
@@ -160,11 +161,23 @@ namespace BL
             DBManager dbMgr = new DBManager();
 
             // Try to get it from DB for today
-            Quotation quotation = dbMgr.GetQuotation(coinCode, DateTime.Today.Date);
+            DateTime lastValidDay = DateTime.Today.Date;
+            while (!Utils.IsValidDay(lastValidDay))
+            {
+                lastValidDay = lastValidDay.AddDays(-1);
+            }
+            Quotation quotation = dbMgr.GetQuotation(coinCode, lastValidDay);
 
             if (quotation == null)
             {// Wasn't in DB, consume central bank WS
-                quotation = ApiClients.GetQuotation(coinCode, DateTime.Today.Date, DateTime.Today.Date)[0];
+                List<Quotation> quots = ApiClients.GetQuotation(coinCode, lastValidDay, lastValidDay);
+                while (quots == null || quots.Count == 0)
+                {
+                    lastValidDay = lastValidDay.AddDays(-1);
+                    quots = ApiClients.GetQuotation(coinCode, lastValidDay, lastValidDay);
+                }
+
+                quotation = quots[0];
                 quotation.Coin = dbMgr.GetCurrency(coinCode);
 
                 // Add new quotation to DB if it is new

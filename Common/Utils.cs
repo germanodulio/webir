@@ -20,6 +20,11 @@ namespace Common
             return result;
         }
 
+        /// <summary>
+        /// Returns true if it is not saturday or sunday
+        /// </summary>
+        /// <param name="day"></param>
+        /// <returns></returns>
         public static bool IsValidDay(DateTime day)
         {
             return day.DayOfWeek != DayOfWeek.Saturday && day.DayOfWeek != DayOfWeek.Sunday;

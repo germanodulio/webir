@@ -22,7 +22,8 @@ namespace webirBackend.Controllers
                 Core.GetLastQuotation(CoinCode.DolarArg), 
                 Core.GetLastQuotation(CoinCode.DolarArgBlue), 
                 Core.GetLastQuotation(CoinCode.DolarUy), 
-                Core.GetLastQuotation(CoinCode.PesoArgUy) };
+                Core.GetLastQuotation(CoinCode.PesoArgUy) 
+            };
         }
 
         // GET: api/Quotations/{code}
@@ -34,8 +35,11 @@ namespace webirBackend.Controllers
             {
                 return Core.GetMostConvenientCurrency(DateTime.Today.Date);
             }
-            CoinCode coinCode = Enum.Parse<CoinCode>(code);
-            return Core.GetLastQuotation(coinCode);
+            if (Enum.TryParse(code, out CoinCode coinCode))
+            {
+                return Core.GetLastQuotation(coinCode);
+            }
+            return $"El código '{code}' enviado no es válido.";
         }
 
         [HttpPost]
