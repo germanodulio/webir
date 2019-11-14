@@ -17,6 +17,7 @@ namespace Common
                 }
                 lastDay = lastDay.AddDays(-1);
             }
+            result.Reverse();
             return result;
         }
 

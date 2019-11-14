@@ -22,35 +22,17 @@ namespace BL
             {
                 DBManager dbMgr = new DBManager();
 
+                List<DateTime> last2dates = Utils.GetLastDays(date, 2);
+                // todo use this dates
+
                 // Get Dollar quotation in Argentina's central bank
-                Quotation dolarArg = dbMgr.GetQuotation(CoinCode.DolarArg, date);
-                if (dolarArg == null)
-                {
-                    dolarArg = ApiClients.GetQuotation(CoinCode.DolarArg, date, date)[0];
-                    dolarArg.Coin = dbMgr.GetCurrency(CoinCode.DolarArg);
-
-                    dbMgr.AddNewQuotation(dolarArg);
-                }
-
-                //TODO consider Dollar Blue too?
+                Quotation dolarArg = GetLastQuotation(CoinCode.DolarArg);
 
                 // Get Dollar quotation in Uruguay's central bank
-                Quotation dolarUy = dbMgr.GetQuotation(CoinCode.DolarUy, date);
-                if (dolarUy == null)
-                {
-                    dolarUy = ApiClients.GetQuotation(CoinCode.DolarUy, date, date)[0];
-                    dolarUy.Coin = dbMgr.GetCurrency(CoinCode.DolarUy);
-                    dbMgr.AddNewQuotation(dolarUy);
-                }
+                Quotation dolarUy = GetLastQuotation(CoinCode.DolarUy);
 
                 // Get Peso Argentino quotation in Uruguay's central bank 
-                Quotation pesoArgUy = dbMgr.GetQuotation(CoinCode.PesoArgUy, date);
-                if (pesoArgUy == null)
-                {
-                    pesoArgUy = ApiClients.GetQuotation(CoinCode.PesoArgUy, date, date)[0];
-                    pesoArgUy.Coin = dbMgr.GetCurrency(CoinCode.PesoArgUy);
-                    dbMgr.AddNewQuotation(pesoArgUy);
-                }
+                Quotation pesoArgUy = GetLastQuotation(CoinCode.PesoArgUy);
 
                 // How many Peso Argentino's can you get with 1 dollar in Uruguay?
                 double withOneDollarYouGetArgPeso = 0;
@@ -80,7 +62,7 @@ namespace BL
 
         public static void InitialLoad()
         {
-            // Load last 7 cotizations
+            // Load last 10 cotizations
             List<DateTime> dates = Utils.GetLastDays(DateTime.Today.Date, 10);
 
             GetCotizations(new List<string>() { "DolarUy", "PesoArgUy", "DolarArg", "DolarBlue" }, dates);
@@ -188,6 +170,38 @@ namespace BL
             }
 
             return quotation;
+        }
+
+        private static Quotation GetLastQuotation(CoinCode coin, DateTime best, DateTime alter)
+        {
+            DBManager dbMgr = new DBManager();
+            Quotation result = dbMgr.GetQuotation(coin, best);
+            if (result == null)
+            {
+                List<Quotation> quots = ApiClients.GetQuotation(coin, best, best);
+                if (quots != null && quots.Count > 0)
+                {
+                    result = quots[0];
+                    result.Coin = dbMgr.GetCurrency(coin);
+                    dbMgr.AddNewQuotation(result);
+                }
+                else
+                {
+                    result = dbMgr.GetQuotation(coin, alter);
+
+                    if (result == null)
+                    {
+                        quots = ApiClients.GetQuotation(coin, alter, alter);
+                        if (quots != null && quots.Count > 0)
+                        {
+                            result = quots[0];
+                            result.Coin = dbMgr.GetCurrency(coin);
+                            dbMgr.AddNewQuotation(result);
+                        }
+                    }
+                }
+            }
+            return result;
         }
     }
 }
