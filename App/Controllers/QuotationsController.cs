@@ -46,10 +46,13 @@ namespace webirBackend.Controllers
             return Core.GetMostConvenientCurrency(date);
         }
 
-        [HttpPost]
-        public object GetList(string[] codes, DateTime startTime, DateTime endTime)
+        [HttpGet("range")]
+        // https://localhost:44317/api/Quotations/range?codes=DolarUy&codes=DolarArg&startTime=1-11-2019&endTime=10-11-2019
+        public object GetList([FromQuery(Name = "codes")]string[] codes, string startTime, string endTime)
         {
-            return Core.GetCotizationsBetween(new List<string>(codes), startTime.Date, endTime.Date);
+            DateTime inicio = DateTime.Parse(startTime);
+            DateTime fin = DateTime.Parse(endTime);
+            return Core.GetCotizationsBetween(new List<string>(codes), inicio, fin);
         }
     }
 }

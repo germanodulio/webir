@@ -66,7 +66,6 @@ namespace BL
             {
                 return null;
             }
-
         }
 
         public static void InitialLoad()
@@ -91,7 +90,6 @@ namespace BL
             }
 
             return GetCotizations(codes, Utils.GetValidDays(start, end));
-
         }
 
         public static object GetCotizations(List<string> codes, List<DateTime> days)
@@ -133,8 +131,8 @@ namespace BL
                             current.Add(q);
                             mgr.AddNewQuotation(q);
                         }
-                        result.Add(current);
                     }
+                    result.Add(current);
                 }
             }
 

@@ -52,6 +52,7 @@ namespace DataBaseConnector
                 Quotation q = _quotationSrv.Get(coinCode, day);
                 if (q != null)
                 {
+                    q.Coin = _currencySrv.Get(coinCode);
                     result.Add(q);
                 }
                 else
