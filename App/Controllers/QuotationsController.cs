@@ -43,9 +43,9 @@ namespace webirBackend.Controllers
         }
 
         [HttpPost]
-        public object GetList(List<string> codes, DateTime startTime, DateTime endTime)
+        public object GetList(string[] codes, DateTime startTime, DateTime endTime)
         {
-            return Core.GetCotizationsBetween(codes, startTime.Date, endTime.Date);
+            return Core.GetCotizationsBetween(new List<string>(codes), startTime.Date, endTime.Date);
         }
     }
 }
