@@ -18,28 +18,32 @@ namespace webirBackend.Controllers
         [HttpGet]
         public IEnumerable<Quotation> Get()
         {
-            return new List<Quotation>() { 
-                Core.GetLastQuotation(CoinCode.DolarArg), 
-                Core.GetLastQuotation(CoinCode.DolarArgBlue), 
-                Core.GetLastQuotation(CoinCode.DolarUy), 
-                Core.GetLastQuotation(CoinCode.PesoArgUy) 
+            return new List<Quotation>() {
+                Core.GetLastQuotation(CoinCode.DolarArg),
+                Core.GetLastQuotation(CoinCode.DolarArgBlue),
+                Core.GetLastQuotation(CoinCode.DolarUy),
+                Core.GetLastQuotation(CoinCode.PesoArgUy)
             };
         }
 
         // GET: api/Quotations/{code}
         [HttpGet("{code}", Name = "Get")]
         public object Get(string code)
-            // DolarUy, DolarArg, DolarBlue, PesoArgUy, Best
+        // DolarUy, DolarArg, DolarBlue, PesoArgUy
         {
-            if (code == "Best")
-            {
-                return Core.GetMostConvenientCurrency(DateTime.Today.Date);
-            }
             if (Enum.TryParse(code, out CoinCode coinCode))
             {
                 return Core.GetLastQuotation(coinCode);
             }
             return $"El código '{code}' enviado no es válido.";
+        }
+
+        [Route("[action]/{dateStr}")] // api/Quotations/Best/dd-MM-YYYY
+        [HttpGet]
+        public object Best(string dateStr)
+        {
+            DateTime date = DateTime.Parse(dateStr);
+            return Core.GetMostConvenientCurrency(date);
         }
 
         [HttpPost]

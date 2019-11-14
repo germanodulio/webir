@@ -20,19 +20,29 @@ namespace BL
             // 1 dollar based calculation. You are in Uruguay and will travel to Argentina, so...which currency will you carry?
             try
             {
-                DBManager dbMgr = new DBManager();
+                if (date == null)
+                {
+                    date = DateTime.Today;
+                }
+                else if (date > DateTime.Today)
+                {
+                    throw new Exception("Selected date can't be from future.");
+                }
 
                 List<DateTime> last2dates = Utils.GetLastDays(date, 2);
-                // todo use this dates
+                if (last2dates == null || last2dates.Count != 2)
+                {
+                    throw new Exception($"Couldn't get two dates valid around {date.ToString()}");
+                }
 
                 // Get Dollar quotation in Argentina's central bank
-                Quotation dolarArg = GetLastQuotation(CoinCode.DolarArg);
+                Quotation dolarArg = GetLastQuotation(CoinCode.DolarArg, last2dates[1], last2dates[0]);
 
                 // Get Dollar quotation in Uruguay's central bank
-                Quotation dolarUy = GetLastQuotation(CoinCode.DolarUy);
+                Quotation dolarUy = GetLastQuotation(CoinCode.DolarUy, last2dates[1], last2dates[0]);
 
                 // Get Peso Argentino quotation in Uruguay's central bank 
-                Quotation pesoArgUy = GetLastQuotation(CoinCode.PesoArgUy);
+                Quotation pesoArgUy = GetLastQuotation(CoinCode.PesoArgUy, last2dates[1], last2dates[0]);
 
                 // How many Peso Argentino's can you get with 1 dollar in Uruguay?
                 double withOneDollarYouGetArgPeso = 0;
@@ -40,7 +50,6 @@ namespace BL
                 {
                     withOneDollarYouGetArgPeso = dolarUy.Value / pesoArgUy.Value;
                 }
-
 
                 // si dollarArg > unDolarEnPesosArgentinosEnUy entonces conviene llevar dolares y cambiarlos en Argentina a pesos argentinos
                 // sino comprar pesos argentinos en Uruguay para llevar 
@@ -140,36 +149,8 @@ namespace BL
         /// <returns></returns>
         public static Quotation GetLastQuotation(CoinCode coinCode)
         {
-            DBManager dbMgr = new DBManager();
-
-            // Try to get it from DB for today
-            DateTime lastValidDay = DateTime.Today.Date;
-            while (!Utils.IsValidDay(lastValidDay))
-            {
-                lastValidDay = lastValidDay.AddDays(-1);
-            }
-            Quotation quotation = dbMgr.GetQuotation(coinCode, lastValidDay);
-
-            if (quotation == null)
-            {// Wasn't in DB, consume central bank WS
-                List<Quotation> quots = ApiClients.GetQuotation(coinCode, lastValidDay, lastValidDay);
-                while (quots == null || quots.Count == 0)
-                {
-                    lastValidDay = lastValidDay.AddDays(-1);
-                    quots = ApiClients.GetQuotation(coinCode, lastValidDay, lastValidDay);
-                }
-
-                quotation = quots[0];
-                quotation.Coin = dbMgr.GetCurrency(coinCode);
-
-                // Add new quotation to DB if it is new
-                if (!dbMgr.QuotationExists(quotation))
-                {
-                    dbMgr.AddNewQuotation(quotation);
-                }
-            }
-
-            return quotation;
+            List<DateTime> last2dates = Utils.GetLastDays(DateTime.Today, 2);
+            return GetLastQuotation(coinCode, last2dates[1], last2dates[0]);
         }
 
         private static Quotation GetLastQuotation(CoinCode coin, DateTime best, DateTime alter)
