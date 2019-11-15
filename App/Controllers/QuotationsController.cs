@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using System;
 using System.Collections.Generic;
+
 using static Common.Enums;
 
 namespace webirBackend.Controllers
@@ -29,7 +30,7 @@ namespace webirBackend.Controllers
         // GET: api/Quotations/{code}
         [HttpGet("{code}", Name = "Get")]
         public object Get(string code)
-        // DolarUy, DolarArg, DolarBlue, PesoArgUy
+        // DolarUy, DolarArg, DolarArgBlue, PesoArgUy
         {
             if (Enum.TryParse(code, out CoinCode coinCode))
             {
@@ -38,7 +39,8 @@ namespace webirBackend.Controllers
             return $"El código '{code}' enviado no es válido.";
         }
 
-        [Route("[action]/{dateStr}")] // api/Quotations/Best/dd-MM-YYYY
+        [Route("[action]/{dateStr}")]
+        // api/Quotations/Best/dd-MM-YYYY
         [HttpGet]
         public object Best(string dateStr)
         {
