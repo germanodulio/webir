@@ -140,7 +140,7 @@ namespace BL
         /// <returns></returns>
         public static Quotation GetLastQuotation(CoinCode coinCode)
         {
-            List<DateTime> last2dates = Utils.GetLastDays(DateTime.Today, 2);
+            List<DateTime> last2dates = Utils.GetLastDays(coinCode, DateTime.Today, 2);
             return GetLastQuotation(coinCode, last2dates[1], last2dates[0]);
         }
 

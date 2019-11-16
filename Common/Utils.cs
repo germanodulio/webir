@@ -1,10 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using static Common.Enums;
+
 namespace Common
 {
     public static class Utils
     {
+        public static List<DateTime> GetLastDays(CoinCode coinCode, DateTime lastDay, int daysCount)
+        {
+            List<DateTime> result = new List<DateTime>();
+            while (daysCount > 0)
+            {
+                if (IsValidDay(lastDay, coinCode))
+                {
+                    result.Add(lastDay);
+                    daysCount--;
+                }
+                lastDay = lastDay.AddDays(-1);
+            }
+            result.Reverse();
+            return result;
+        }
+
+        private static bool IsValidDay(DateTime day, CoinCode coinCode)
+        {
+            if (day.Date == DateTime.Today)
+            {
+                switch (coinCode)
+                {
+                    case CoinCode.DolarArg:
+                    case CoinCode.DolarArgBlue:
+                        return DateTime.Now >= day.AddHours(22);
+                    case CoinCode.DolarUy:
+                    case CoinCode.PesoArgUy:
+                        return DateTime.Now >= day.AddHours(17);
+                    default:
+                        return IsValidDay(day);
+                }
+            }
+            return IsValidDay(day);
+        }
+
         public static List<DateTime> GetLastDays(DateTime lastDay, int daysCount)
         {
             List<DateTime> result = new List<DateTime>();
