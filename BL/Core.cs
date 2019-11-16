@@ -18,17 +18,17 @@ namespace BL
         public static Currency GetMostConvenientCurrency([Optional] DateTime date)
         {
             // 1 dollar based calculation. You are in Uruguay and will travel to Argentina, so...which currency will you carry?
+
+            if (date == null)
+            {
+                date = DateTime.Today;
+            }
+            else if (date > DateTime.Today)
+            {
+                throw new Exception("Selected date can't be from future.");
+            }
             try
             {
-                if (date == null)
-                {
-                    date = DateTime.Today;
-                }
-                else if (date > DateTime.Today)
-                {
-                    throw new Exception("Selected date can't be from future.");
-                }
-
                 List<DateTime> last2dates = Utils.GetLastDays(date, 2);
                 if (last2dates == null || last2dates.Count != 2)
                 {
