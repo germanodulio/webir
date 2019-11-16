@@ -27,51 +27,44 @@ namespace BL
             {
                 throw new Exception("Selected date can't be from future.");
             }
-            try
+            List<DateTime> last2dates = Utils.GetLastDays(date, 2);
+            if (last2dates == null || last2dates.Count != 2)
             {
-                List<DateTime> last2dates = Utils.GetLastDays(date, 2);
-                if (last2dates == null || last2dates.Count != 2)
-                {
-                    throw new Exception($"Couldn't get two dates valid around {date.ToString()}");
-                }
-
-                // Get Dollar quotation in Argentina's central bank
-                Quotation dolarArg = GetLastQuotation(CoinCode.DolarArg, last2dates[1], last2dates[0]);
-
-                // Get Dollar quotation in Uruguay's central bank
-                Quotation dolarUy = GetLastQuotation(CoinCode.DolarUy, last2dates[1], last2dates[0]);
-
-                // Get Peso Argentino quotation in Uruguay's central bank 
-                Quotation pesoArgUy = GetLastQuotation(CoinCode.PesoArgUy, last2dates[1], last2dates[0]);
-
-                // How many Peso Argentino's can you get with 1 dollar in Uruguay?
-                double withOneDollarYouGetArgPeso = 0;
-                if (pesoArgUy != null && dolarUy != null)
-                {
-                    withOneDollarYouGetArgPeso = dolarUy.Value / pesoArgUy.Value;
-                }
-
-                // si dollarArg > unDolarEnPesosArgentinosEnUy entonces conviene llevar dolares y cambiarlos en Argentina a pesos argentinos
-                // sino comprar pesos argentinos en Uruguay para llevar 
-                if (dolarArg.Value > withOneDollarYouGetArgPeso)
-                {
-                    return dolarArg.Coin;
-                }
-                else
-                {
-                    return pesoArgUy.Coin;
-                }
+                throw new Exception($"Couldn't get two dates valid around {date.ToString()}");
             }
-            catch
+
+            // Get Dollar quotation in Argentina's central bank
+            Quotation dolarArg = GetLastQuotation(CoinCode.DolarArg, last2dates[1], last2dates[0]);
+
+            // Get Dollar quotation in Uruguay's central bank
+            Quotation dolarUy = GetLastQuotation(CoinCode.DolarUy, last2dates[1], last2dates[0]);
+
+            // Get Peso Argentino quotation in Uruguay's central bank 
+            Quotation pesoArgUy = GetLastQuotation(CoinCode.PesoArgUy, last2dates[1], last2dates[0]);
+
+            // How many Peso Argentino's can you get with 1 dollar in Uruguay?
+            double withOneDollarYouGetArgPeso = 0;
+            if (pesoArgUy != null && dolarUy != null)
             {
-                return null;
+                withOneDollarYouGetArgPeso = dolarUy.Value / pesoArgUy.Value;
+            }
+
+            // si dollarArg > unDolarEnPesosArgentinosEnUy entonces conviene llevar dolares y cambiarlos en Argentina a pesos argentinos
+            // sino comprar pesos argentinos en Uruguay para llevar 
+            if (dolarArg.Value >= withOneDollarYouGetArgPeso)
+            {
+                return dolarArg.Coin;
+            }
+            else
+            {
+                return pesoArgUy.Coin;
             }
         }
 
-        public static void InitialLoad()
+        public static void InitialLoad(int lastDaysCount)
         {
-            // Load last 10 cotizations
-            List<DateTime> dates = Utils.GetLastDays(DateTime.Today.Date, 10);
+            // Load last x cotizations
+            List<DateTime> dates = Utils.GetLastDays(DateTime.Today.Date, lastDaysCount);
 
             GetCotizations(new List<string>() { "DolarUy", "PesoArgUy", "DolarArg", "DolarBlue" }, dates);
         }

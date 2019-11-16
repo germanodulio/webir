@@ -11,7 +11,7 @@ namespace webirBackend
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            //BL.Core.InitialLoad();
+            BL.Core.InitialLoad(lastDaysCount: 5);
         }
 
         public IConfiguration Configuration { get; }
