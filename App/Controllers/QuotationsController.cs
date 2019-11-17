@@ -63,7 +63,7 @@ namespace webirBackend.Controllers
         }
 
         [HttpGet("range")]
-        // https://localhost:44317/api/Quotations/range?codes=DolarUy&codes=DolarArg&startTime=1-11-2019&endTime=10-11-2019
+        // https://localhost:5001/api/Quotations/range?codes=DolarUy&codes=DolarArg&startTime=1-11-2019&endTime=10-11-2019
         public object GetList([FromQuery(Name = "codes")]string[] codes, string startTime, string endTime)
         {
             try
